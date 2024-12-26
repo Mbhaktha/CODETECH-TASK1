@@ -1,71 +1,104 @@
-import java.util.Scanner;
+package calculator;
 
-public class StudentGradeManager {
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Calci {
+    private static String operator = "";
+    private static double firstNumber = 0;
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Create the main frame
+        JFrame frame = new JFrame("Calculator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(350, 500); // Adjusted size for better layout
+        frame.setLayout(new BorderLayout());
 
-        // Ask the user how many subjects they want to enter grades for
-        System.out.print("Enter the number of subjects: ");
-        int numberOfSubjects = scanner.nextInt();
-        
-        // Create an array to store the grades for each subject
-        double[] grades = new double[numberOfSubjects];
+        // Create a text field for display
+        JTextField display = new JTextField();
+        display.setEditable(false);
+        display.setFont(new Font("Arial", Font.BOLD, 28)); // Increased font size
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setPreferredSize(new Dimension(0, 80)); // Increased height
+        frame.add(display, BorderLayout.NORTH);
 
-        // Get grades for each subject
-        for (int i = 0; i < numberOfSubjects; i++) {
-            System.out.print("Enter the grade for subject " + (i + 1) + ": ");
-            grades[i] = scanner.nextDouble();
+        // Create a panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(4, 4, 3, 3)); // Reduced gaps for uniformity
+        frame.add(buttonPanel, BorderLayout.CENTER);
+
+        // Button labels
+        String[] buttons = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", "C", "=", "+"
+        };
+
+        // Add buttons to the panel
+        for (String text : buttons) {
+            JButton button = new JButton(text);
+            button.setFont(new Font("Arial", Font.BOLD, 18)); // Reduced font size
+            buttonPanel.add(button);
+
+            // Add action listeners for functionality
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String command = e.getActionCommand();
+
+                    if (command.matches("[0-9]")) { // If it's a number
+                        display.setText(display.getText() + command);
+                    } else if (command.equals("C")) { // Clear button
+                        display.setText("");
+                        operator = "";
+                        firstNumber = 0;
+                    } else if (command.equals("=")) { // Equals button
+                        try {
+                            double secondNumber = Double.parseDouble(display.getText());
+                            double result = 0;
+                            switch (operator) {
+                                case "+":
+                                    result = firstNumber + secondNumber;
+                                    break;
+                                case "-":
+                                    result = firstNumber - secondNumber;
+                                    break;
+                                case "*":
+                                    result = firstNumber * secondNumber;
+                                    break;
+                                case "/":
+                                    if (secondNumber != 0) {
+                                        result = firstNumber / secondNumber;
+                                    } else {
+                                        display.setText("Error");
+                                        return;
+                                    }
+                                    break;
+                                default:
+                                    return;
+                            }
+                            display.setText(String.valueOf(result));
+                            operator = ""; // Reset operator
+                        } catch (NumberFormatException ex) {
+                            display.setText("Error");
+                        }
+                    } else { // Operator buttons
+                        try {
+                            firstNumber = Double.parseDouble(display.getText());
+                            operator = command;
+                            display.setText("");
+                        } catch (NumberFormatException ex) {
+display.setText("Error");
+                        }
+                    }
+                }
+            });
         }
 
-        // Calculate the average grade
-        double total = 0;
-        for (int i = 0; i < numberOfSubjects; i++) {
-            total += grades[i];
-        }
-        double averageGrade = total / numberOfSubjects;
-
-        // Display the average grade
-        System.out.println("Average Grade: " + averageGrade);
-
-        // Display the letter grade
-        String letterGrade = getLetterGrade(averageGrade);
-        System.out.println("Letter Grade: " + letterGrade);
-
-        // Display the GPA
-        double gpa = calculateGPA(averageGrade);
-        System.out.println("GPA: " + gpa);
-
-        // Close the scanner
-        scanner.close();
-    }
-
-    // Method to convert average grade to letter grade
-    public static String getLetterGrade(double averageGrade) {
-        if (averageGrade >= 90) {
-            return "A";
-        } else if (averageGrade >= 80) {
-            return "B";
-        } else if (averageGrade >= 70) {
-            return "C";
-        } else if (averageGrade >= 60) {
-            return "D";
-        } else {
-            return "F";
-        }
-    }
-
-    // Method to convert average grade to GPA (on a 4.0 scale)
-    public static double calculateGPA(double averageGrade) {
-        if (averageGrade >= 90) {
-            return 4.0;
-        } else if (averageGrade >= 80) {
-            return 3.0;
-        } else if (averageGrade >= 70) {
-            return 2.0;
-        } else if (averageGrade >= 60) {
-            return 1.0;
-        } else {
-            return 0.0;
-        }
+        // Set frame visibility
+        frame.setVisible(true);
     }
 }
